@@ -1,0 +1,824 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>MestreXit | Sensibilidade + Admin (Firebase)</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    body, html {
+      height: 100%;
+      overflow: hidden;
+      background: #000;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    #particles-js {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      z-index: 0;
+    }
+
+    .key-screen {
+      position: relative;
+      z-index: 20;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(4px);
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+
+    .key-card {
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(12px);
+      border-radius: 32px;
+      padding: 40px 30px;
+      width: 90%;
+      max-width: 420px;
+      text-align: center;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 255, 255, 0.1);
+      animation: fadeInUp 0.6s ease-out;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px);}
+      to { opacity: 1; transform: translateY(0);}
+    }
+
+    .key-card h1 {
+      font-size: 48px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #FFFFFF, #AAAAAA);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 8px;
+      letter-spacing: 2px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .key-card h1:active { transform: scale(0.98);}
+
+    .sub {
+      font-size: 14px;
+      color: #ccc;
+      margin-bottom: 30px;
+      border-bottom: 1px dashed rgba(255,255,255,0.3);
+      display: inline-block;
+      padding-bottom: 6px;
+    }
+
+    .key-input-group {
+      margin: 25px 0;
+      text-align: left;
+    }
+    .key-input-group label {
+      font-size: 14px;
+      color: #ddd;
+      display: block;
+      margin-bottom: 8px;
+    }
+    .key-input-group input {
+      width: 100%;
+      padding: 14px 18px;
+      background: rgba(20, 20, 30, 0.9);
+      border: 1.5px solid rgba(255, 255, 255, 0.4);
+      border-radius: 50px;
+      font-size: 16px;
+      color: white;
+      font-family: monospace;
+      transition: all 0.3s;
+      outline: none;
+    }
+    .key-input-group input:focus {
+      border-color: #ffffff;
+      box-shadow: 0 0 12px rgba(255,255,255,0.5);
+    }
+    .btn-key {
+      width: 100%;
+      padding: 14px;
+      background: transparent;
+      border: 2px solid white;
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .btn-key:hover {
+      background: white;
+      color: black;
+      box-shadow: 0 0 15px white;
+    }
+    .error-message {
+      color: #ff5e5e;
+      font-size: 13px;
+      margin-top: 12px;
+      min-height: 35px;
+    }
+
+    .main-content {
+      position: relative;
+      z-index: 10;
+      display: none;
+      width: 100%;
+      height: 100%;
+    }
+    .container {
+      position: relative;
+      background-color: rgba(0, 0, 0, 0.8);
+      padding: 30px;
+      border-radius: 15px;
+      border: 1px solid #ffffff50;
+      box-shadow: 0px 0px 15px rgba(255, 255, 255, 0.2);
+      width: 90%;
+      max-width: 400px;
+      text-align: center;
+      margin: auto;
+      top: 50%;
+      transform: translateY(-50%);
+      color: white;
+    }
+    .menu-buttons { display: flex; justify-content: center; margin-bottom: 20px; gap: 10px; }
+    .menu-buttons button {
+      background-color: transparent; border: 2px solid white; color: white;
+      font-size: 16px; padding: 10px 0; border-radius: 8px; cursor: pointer; flex: 1;
+      transition: all 0.3s;
+    }
+    .menu-buttons button:hover, .menu-buttons button.active {
+      background-color: white; color: black;
+    }
+    select, button.action {
+      width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px;
+      background-color: #111; color: white; border: 1px solid #ffffff50;
+    }
+    button.action {
+      background-color: transparent; border: 2px solid white; font-weight: bold; cursor: pointer;
+    }
+    button.action:hover { background-color: white; color: black; }
+    .resultado, .auxilios {
+      background-color: #111; margin-top: 20px; padding: 15px; border: 1px solid #ffffff50;
+      border-radius: 8px; display: none; text-align: left;
+    }
+    .auxilios label { display: flex; align-items: center; margin-bottom: 10px; gap: 10px; }
+    .auxilios input[type="checkbox"] { width: 18px; height: 18px; appearance: none; background-color: black; border: 2px solid white; border-radius: 4px; cursor: pointer; }
+    .auxilios input[type="checkbox"]:checked { background-color: white; }
+    .progress-bar { width: 100%; background-color: #333; border-radius: 10px; overflow: hidden; margin-top: 10px; display: none; }
+    .progress-bar-inner { height: 10px; width: 0; background-color: #fff; transition: width 3s linear; }
+    .injection-message { margin-top: 15px; color: white; font-weight: bold; display: none; text-align: center; }
+    .creditos { position: absolute; bottom: 10px; width: 100%; text-align: center; font-size: 14px; color: gray; z-index: 10; }
+    .creditos a { color: white; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; gap: 5px; }
+    .admin-icon {
+      position: fixed; bottom: 20px; right: 20px; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px);
+      border-radius: 50px; padding: 10px 18px; cursor: pointer; z-index: 25;
+      border: 1px solid white; color: white; font-weight: bold; font-size: 14px;
+      transition: 0.2s; display: flex; align-items: center; gap: 8px;
+    }
+    .admin-icon:hover { background: white; color: black; }
+
+    .modal-proibida {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95);
+      backdrop-filter: blur(8px); z-index: 100; display: none; justify-content: center; align-items: center;
+    }
+    .modal-card {
+      background: #0a0a0a; border: 1px solid #ffffff70; border-radius: 28px; width: 90%; max-width: 700px;
+      max-height: 85vh; overflow-y: auto; padding: 25px; color: white; box-shadow: 0 0 30px rgba(255,255,255,0.2);
+    }
+    .modal-card h3 { font-size: 28px; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center; }
+    .close-modal { background: none; border: none; color: white; font-size: 28px; cursor: pointer; }
+    .key-list { margin-top: 20px; max-height: 350px; overflow-y: auto; }
+    .key-item {
+      background: #111; margin: 8px 0; padding: 12px 15px; border-radius: 16px;
+      display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #fff;
+    }
+    .key-code { font-family: monospace; font-weight: bold; letter-spacing: 1px; }
+    .key-status { font-size: 12px; padding: 4px 10px; border-radius: 50px; background: #2c2c2c; }
+    .status-active { color: #4cff4c; }
+    .status-paused { color: #ffaa44; }
+    .status-expired { color: #ff5e5e; }
+    .key-actions button {
+      background: transparent; border: 1px solid white; color: white; margin-left: 8px; padding: 5px 12px; border-radius: 20px; cursor: pointer; transition: 0.2s;
+    }
+    .key-actions button:hover { background: white; color: black; }
+    .delete-key-btn { border-color: #ff5555 !important; color: #ff8888 !important; }
+    .delete-key-btn:hover { background: #ff5555 !important; color: black !important; border-color: #ff5555 !important; }
+    .gerar-area {
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .suffix-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      background: #1a1a1a;
+      padding: 12px;
+      border-radius: 60px;
+      border: 1px solid #ffffff30;
+    }
+    .suffix-group label {
+      font-size: 14px;
+      font-weight: bold;
+      background: #333;
+      padding: 6px 12px;
+      border-radius: 40px;
+    }
+    .suffix-group input {
+      flex: 1;
+      padding: 10px 15px;
+      background: #000;
+      border: 1px solid #fff;
+      border-radius: 40px;
+      color: white;
+      font-family: monospace;
+      font-size: 14px;
+    }
+
+    .duration-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #1a1a1a;
+      padding: 12px;
+      border-radius: 60px;
+      border: 1px solid #ffffff30;
+      margin-bottom: 5px;
+    }
+    .duration-group label {
+      font-size: 14px;
+      background: #333;
+      padding: 6px 12px;
+      border-radius: 40px;
+      white-space: nowrap;
+    }
+    .duration-group input {
+      width: 70px;
+      padding: 10px;
+      background: #000;
+      border: 1px solid #fff;
+      border-radius: 40px;
+      color: white;
+      font-family: monospace;
+      text-align: center;
+    }
+    .duration-group select {
+      flex: 1;
+      padding: 10px;
+      background: #000;
+      border: 1px solid #fff;
+      border-radius: 40px;
+      color: white;
+      font-size: 14px;
+    }
+
+    .btn-gerar {
+      background: white;
+      color: black;
+      border: none;
+      padding: 12px;
+      border-radius: 40px;
+      font-weight: bold;
+      cursor: pointer;
+      width: 100%;
+      font-size: 16px;
+    }
+    .btn-gerar:hover { background: #ccc; }
+    .admin-notice {
+      font-size: 12px;
+      color: #aaa;
+      margin-top: 10px;
+      text-align: center;
+    }
+    .preview-key {
+      background: #000000aa;
+      padding: 8px;
+      border-radius: 30px;
+      text-align: center;
+      font-family: monospace;
+      font-size: 13px;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+<div id="particles-js"></div>
+
+<!-- Tela de ativação principal -->
+<div id="keyScreen" class="key-screen">
+  <div class="key-card">
+    <h1 id="mestreXitTitle">MestreXit</h1>
+    <div class="sub">🔐 Ativação via Firebase</div>
+    <div class="key-input-group">
+      <label><i class="fas fa-key"></i> Chave de acesso</label>
+      <input type="text" id="mainKeyInput" placeholder="Digite sua chave..." autocomplete="off">
+    </div>
+    <button class="btn-key" id="validateMainBtn"><i class="fas fa-unlock-alt"></i> Validar</button>
+    <div id="mainKeyError" class="error-message"></div>
+  </div>
+</div>
+
+<!-- App principal (sensibilidade) -->
+<div id="mainApp" class="main-content">
+  <div class="container">
+    <h1>Sensibilidade / Auxílio</h1>
+    <h2>Configure a sensibilidade para usar</h2>
+    <div class="menu-buttons">
+      <button id="btnSensi" class="active" onclick="mostrar('sensi')">Sensi</button>
+      <button id="btnAuxilio" onclick="mostrar('auxilio')">Auxílio</button>
+    </div>
+    <div id="sensi" style="display: block;">
+      <select id="marca" onchange="atualizarModelos()">
+        <option value="">Selecione a marca</option>
+        <option value="Apple">Apple</option><option value="Samsung">Samsung</option><option value="Xiaomi">Xiaomi</option>
+        <option value="Motorola">Motorola</option><option value="Asus">Asus</option><option value="Realme">Realme</option>
+        <option value="Huawei">Huawei</option><option value="LG">LG</option><option value="Sony">Sony</option>
+        <option value="Infinix">Infinix</option><option value="OnePlus">OnePlus</option><option value="Google">Google Pixel</option>
+        <option value="Nokia">Nokia</option><option value="Nothing">Nothing</option><option value="Oppo">Oppo</option><option value="Vivo">Vivo</option>
+      </select>
+      <select id="modelo"><option value="">Selecione o modelo</option></select>
+      <button class="action" onclick="gerarSensibilidade()">Gerar</button>
+      <div class="resultado" id="resultado"></div>
+    </div>
+    <div id="auxilio" class="auxilios">
+      <label><input type="checkbox" id="calibrar"> Calibrar sensibilidade</label>
+      <label><input type="checkbox" id="reduzir"> Reduzir recuo</label>
+      <label><input type="checkbox" id="precisao"> Aumentar precisão</label>
+      <label><input type="checkbox" id="inputlag"> Retirar input lag</label>
+      <button class="action" onclick="injetarAuxilio()">Injetar</button>
+      <div class="progress-bar" id="progress-bar"><div class="progress-bar-inner" id="progress-bar-inner"></div></div>
+      <div class="injection-message" id="injection-message">Injetado com sucesso!</div>
+    </div>
+  </div>
+  <div class="creditos">Desenvolvido por <a href="https://www.instagram.com/real.adriel01?igsh=MWp5Z2NiNzZqbWZtYQ==" target="_blank"><i class="fab fa-instagram"></i> MestreXit</a></div>
+</div>
+
+<!-- Ícone de admin -->
+<div id="adminIcon" class="admin-icon" style="display: none;">
+  <i class="fas fa-shield-alt"></i> Área Proibida
+</div>
+
+<!-- Modal Área Proibida -->
+<div id="modalProibida" class="modal-proibida">
+  <div class="modal-card">
+    <h3><span><i class="fas fa-skull"></i> Área Restrita</span> <button class="close-modal" id="closeModalBtn">&times;</button></h3>
+    <div style="border-bottom:1px solid #333; margin: 10px 0 20px;"></div>
+    <div id="adminKeysContainer"></div>
+    <div class="gerar-area">
+      <div class="suffix-group">
+        <label><i class="fas fa-pen-alt"></i> Sufixo</label>
+        <input type="text" id="customSuffix" placeholder="ex: 123, ABC, XT-99" autocomplete="off">
+      </div>
+      <div class="duration-group">
+        <label><i class="fas fa-hourglass-half"></i> Duração</label>
+        <input type="number" id="durationValue" min="0" value="0" step="1">
+        <select id="durationUnit">
+          <option value="permanent">Permanente</option>
+          <option value="minutes">Minutos</option>
+          <option value="hours">Horas</option>
+          <option value="days">Dias</option>
+          <option value="months">Meses</option>
+          <option value="years">Anos</option>
+        </select>
+      </div>
+      <button class="btn-gerar" id="gerarKeyBtn">+ Gerar Nova Key (MESTRESENSI-)</button>
+      <div class="preview-key" id="previewKeyDisplay">🔑 MESTRESENSI-? </div>
+    </div>
+    <div class="admin-notice"><i class="fas fa-cloud-upload-alt"></i> Sincronizado via Firebase</div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { 
+    getFirestore, 
+    collection, 
+    query, 
+    where, 
+    getDocs, 
+    addDoc, 
+    updateDoc, 
+    deleteDoc, 
+    doc, 
+    onSnapshot,
+    serverTimestamp,
+    Timestamp 
+  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyCxZoiw8h9ZCGxF1XP871DFIQ2tX40RPkg",
+    authDomain: "mestrexit-327fd.firebaseapp.com",
+    projectId: "mestrexit-327fd",
+    storageBucket: "mestrexit-327fd.firebasestorage.app",
+    messagingSenderId: "352059845970",
+    appId: "1:352059845970:web:45f33fcfb8595de7c6de8b",
+    measurementId: "G-9PDKN5SZ0V"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const keysCollection = collection(db, "keys");
+
+  const VALID_MASTER_KEY = "MESTREXIT-999";
+  const SECRET_ADMIN_KEY = "07058377";
+  const KEY_PREFIX = "MESTRESENSI-";
+  let adminUnlocked = false;
+  let unsubscribeKeys = null;
+
+  // ========== FUNÇÕES DE TEMPO (incluindo minutos) ==========
+  function parseDuration(value, unit) {
+    if (unit === 'permanent' || value <= 0) return null;
+    const num = parseInt(value) || 0;
+    if (num <= 0) return null;
+    let ms = 0;
+    let label = '';
+    switch (unit) {
+      case 'minutes': ms = num * 60 * 1000; label = `${num} minuto${num>1?'s':''}`; break;
+      case 'hours': ms = num * 60 * 60 * 1000; label = `${num} hora${num>1?'s':''}`; break;
+      case 'days': ms = num * 24 * 60 * 60 * 1000; label = `${num} dia${num>1?'s':''}`; break;
+      case 'months': ms = num * 30 * 24 * 60 * 60 * 1000; label = `${num} ${num>1?'meses':'mês'}`; break;
+      case 'years': ms = num * 365 * 24 * 60 * 60 * 1000; label = `${num} ano${num>1?'s':''}`; break;
+      default: return null;
+    }
+    return { ms, label };
+  }
+
+  function isKeyExpired(createdAt, expiresIn) {
+    if (!createdAt || !expiresIn || expiresIn === 'permanent') return false;
+    const parts = expiresIn.split(' ');
+    if (parts.length < 2) return false;
+    const value = parseInt(parts[0]);
+    const unit = parts[1];
+    const duration = parseDuration(value, unit);
+    if (!duration) return false;
+    const now = Timestamp.now();
+    const createdAtMs = createdAt.toMillis();
+    const expirationMs = createdAtMs + duration.ms;
+    return now.toMillis() > expirationMs;
+  }
+
+  function formatExpiration(createdAt, expiresIn) {
+    if (!createdAt) return 'Desconhecido';
+    if (!expiresIn || expiresIn === 'permanent') return 'Permanente';
+    try {
+      const parts = expiresIn.split(' ');
+      const value = parseInt(parts[0]);
+      const unit = parts[1];
+      const duration = parseDuration(value, unit);
+      if (!duration) return expiresIn;
+      const expirationDate = new Date(createdAt.toMillis() + duration.ms);
+      return `Expira ${expirationDate.toLocaleDateString('pt-BR')} ${expirationDate.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'})}`;
+    } catch { return expiresIn; }
+  }
+
+  // ========== GERENCIAMENTO DE KEYS ==========
+  async function isSuffixTaken(suffix) {
+    const full = KEY_PREFIX + suffix;
+    const q = query(keysCollection, where("keyString", "==", full));
+    const snapshot = await getDocs(q);
+    return !snapshot.empty;
+  }
+
+  async function generateNewKey(customSuffix = "") {
+    let finalSuffix = customSuffix.trim();
+    let finalKey = "";
+    
+    if (finalSuffix === "") {
+      const allKeys = await getDocs(keysCollection);
+      let maxNum = 0;
+      allKeys.forEach(doc => {
+        const keyStr = doc.data().keyString;
+        if (keyStr && keyStr.startsWith(KEY_PREFIX)) {
+          const suffixPart = keyStr.substring(KEY_PREFIX.length);
+          const num = parseInt(suffixPart, 10);
+          if (!isNaN(num) && num > maxNum) maxNum = num;
+        }
+      });
+      let candidate = (maxNum + 1).toString();
+      while (await isSuffixTaken(candidate)) {
+        maxNum++;
+        candidate = maxNum.toString();
+      }
+      finalKey = KEY_PREFIX + candidate;
+    } else {
+      if (await isSuffixTaken(finalSuffix)) {
+        alert(`❌ O sufixo "${finalSuffix}" já existe! Escolha outro.`);
+        return null;
+      }
+      finalKey = KEY_PREFIX + finalSuffix;
+    }
+    return finalKey;
+  }
+
+  async function addNewKey(customSuffix, durationValue, durationUnit) {
+    const newKeyStr = await generateNewKey(customSuffix);
+    if (!newKeyStr) return false;
+    
+    let expiresIn = 'permanent';
+    if (durationUnit !== 'permanent' && durationValue > 0) {
+      expiresIn = `${durationValue} ${durationUnit}`;
+    }
+    
+    try {
+      await addDoc(keysCollection, {
+        keyString: newKeyStr,
+        status: "active",
+        createdAt: serverTimestamp(),
+        expiresIn: expiresIn
+      });
+      return true;
+    } catch (e) {
+      alert("Erro ao gerar chave: " + e.message);
+      return false;
+    }
+  }
+
+  async function deleteKeyById(docId) {
+    try {
+      await deleteDoc(doc(db, "keys", docId));
+    } catch (e) {
+      alert("Erro ao excluir: " + e.message);
+    }
+  }
+
+  async function toggleKeyStatus(docId, newStatus) {
+    try {
+      await updateDoc(doc(db, "keys", docId), { status: newStatus });
+    } catch (e) {
+      alert("Erro ao alterar status: " + e.message);
+    }
+  }
+
+  function listenToKeys() {
+    if (unsubscribeKeys) unsubscribeKeys();
+    const container = document.getElementById('adminKeysContainer');
+    if (!container) return;
+    
+    unsubscribeKeys = onSnapshot(keysCollection, (snapshot) => {
+      if (snapshot.empty) {
+        container.innerHTML = `<div style="text-align:center; padding:30px;">Nenhuma key gerada ainda.<br>Clique em "Gerar Nova Key".</div>`;
+        return;
+      }
+      let html = `<div class="key-list">`;
+      snapshot.forEach(doc => {
+        const k = doc.data();
+        const docId = doc.id;
+        const isActive = k.status === 'active';
+        const expired = (k.createdAt && k.expiresIn) ? isKeyExpired(k.createdAt, k.expiresIn) : false;
+        const expInfo = formatExpiration(k.createdAt, k.expiresIn);
+        let statusClass = '';
+        let statusText = '';
+        if (!isActive) {
+          statusClass = 'status-paused';
+          statusText = 'PAUSADA';
+        } else if (expired) {
+          statusClass = 'status-expired';
+          statusText = 'EXPIRADA';
+        } else {
+          statusClass = 'status-active';
+          statusText = 'ATIVA';
+        }
+        
+        html += `
+          <div class="key-item">
+            <div>
+              <div class="key-code">🔑 ${k.keyString}</div>
+              <div class="key-status ${statusClass}">${statusText}</div>
+              <div style="font-size: 11px; color: #aaa; margin-top: 5px;">${expInfo}</div>
+            </div>
+            <div class="key-actions">
+              ${isActive && !expired ? 
+                `<button class="pause-key" data-id="${docId}">⏸️ Pausar</button>` : 
+                (isActive && expired ? '' : `<button class="reactivate-key" data-id="${docId}">▶️ Reativar</button>`)}
+              <button class="delete-key-btn" data-id="${docId}"><i class="fas fa-trash-alt"></i> Excluir</button>
+            </div>
+          </div>
+        `;
+      });
+      html += `</div>`;
+      container.innerHTML = html;
+      
+      document.querySelectorAll('.pause-key').forEach(btn => {
+        btn.addEventListener('click', () => toggleKeyStatus(btn.dataset.id, 'paused'));
+      });
+      document.querySelectorAll('.reactivate-key').forEach(btn => {
+        btn.addEventListener('click', () => toggleKeyStatus(btn.dataset.id, 'active'));
+      });
+      document.querySelectorAll('.delete-key-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if (confirm("Excluir permanentemente?")) {
+            await deleteKeyById(btn.dataset.id);
+          }
+        });
+      });
+    });
+  }
+
+  // ========== VALIDAÇÃO ==========
+  async function validateMain() {
+    const input = document.getElementById('mainKeyInput').value.trim();
+    const err = document.getElementById('mainKeyError');
+    
+    if (input === VALID_MASTER_KEY) {
+      unlockApp();
+      return;
+    }
+    
+    try {
+      const q = query(keysCollection, where("keyString", "==", input), where("status", "==", "active"));
+      const snapshot = await getDocs(q);
+      
+      if (!snapshot.empty) {
+        const docData = snapshot.docs[0].data();
+        const createdAt = docData.createdAt;
+        const expiresIn = docData.expiresIn;
+        if (createdAt && expiresIn && isKeyExpired(createdAt, expiresIn)) {
+          err.innerHTML = '<i class="fas fa-clock"></i> Chave expirada!';
+          setTimeout(() => err.innerHTML = '', 2000);
+          return;
+        }
+        unlockApp();
+      } else {
+        err.innerHTML = '<i class="fas fa-times-circle"></i> Chave inválida ou inativa!';
+        setTimeout(() => err.innerHTML = '', 2000);
+      }
+    } catch (e) {
+      err.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Erro de conexão com Firebase.';
+      setTimeout(() => err.innerHTML = '', 3000);
+      console.error(e);
+    }
+  }
+  
+  function unlockApp() {
+    document.getElementById('keyScreen').style.opacity = '0';
+    setTimeout(() => {
+      document.getElementById('keyScreen').style.display = 'none';
+      document.getElementById('mainApp').style.display = 'block';
+      document.getElementById('adminIcon').style.display = 'flex';
+    }, 500);
+  }
+
+  function showAdminModalWithValidation() {
+    if (adminUnlocked) {
+      document.getElementById('modalProibida').style.display = 'flex';
+      return;
+    }
+    const secret = prompt("🔐 ACESSO RESTRITO\nDigite a chave de administrador:");
+    if (secret === SECRET_ADMIN_KEY) {
+      adminUnlocked = true;
+      document.getElementById('modalProibida').style.display = 'flex';
+    } else if (secret !== null) {
+      alert("Chave inválida!");
+    }
+  }
+
+  // Modelos de celular
+  const modelos = {
+    Apple: ["iPhone 16 Pro Max", "iPhone 16 Pro", "iPhone 16 Plus", "iPhone 16", "iPhone 15 Pro Max", "iPhone 15 Pro", "iPhone 15 Plus", "iPhone 15", "iPhone 14 Pro Max", "iPhone 14 Pro", "iPhone 14 Plus", "iPhone 14", "iPhone 13 Pro Max", "iPhone 13 Pro", "iPhone 13", "iPhone 13 mini", "iPhone 12 Pro Max", "iPhone 12 Pro", "iPhone 12", "iPhone 12 mini", "iPhone SE (3ª gen)", "iPhone SE (2ª gen)", "iPhone XS Max", "iPhone XS", "iPhone XR", "iPhone X", "iPhone 8 Plus", "iPhone 8", "iPhone 7 Plus", "iPhone 7", "Outro"],
+    Samsung: ["Galaxy S25 Ultra", "Galaxy S25+", "Galaxy S25", "Galaxy S24 Ultra", "Galaxy S24+", "Galaxy S24", "Galaxy S23 Ultra", "Galaxy S23+", "Galaxy S23", "Galaxy S22 Ultra", "Galaxy S22+", "Galaxy S22", "Galaxy Z Fold 6", "Galaxy Z Fold 5", "Galaxy Z Flip 6", "Galaxy Z Flip 5", "Galaxy A74", "Galaxy A73", "Galaxy A55", "Galaxy A54", "Galaxy A35", "Galaxy A34", "Galaxy M54", "Galaxy M34", "Outro"],
+    Xiaomi: ["Xiaomi 15 Ultra", "Xiaomi 15 Pro", "Xiaomi 15", "Xiaomi 14 Ultra", "Xiaomi 14 Pro", "Xiaomi 14", "Xiaomi 13 Ultra", "Xiaomi 13 Pro", "Xiaomi 13", "Redmi Note 14 Pro+", "Redmi Note 14 Pro", "Redmi Note 14", "Redmi Note 13 Pro+", "Redmi Note 13 Pro", "Redmi Note 13", "Poco F7 Pro", "Poco F7", "Poco X7 Pro", "Poco X7", "Poco M7 Pro", "Xiaomi Civi 4 Pro", "Black Shark 6 Pro", "Outro"],
+    Motorola: ["Motorola Edge 50 Ultra", "Motorola Edge 50 Pro", "Motorola Edge 50", "Motorola Edge 40 Pro", "Motorola Edge 40", "Motorola Edge 30 Ultra", "Motorola Edge 30", "Motorola Moto G100", "Motorola Moto G200", "Motorola Moto G84", "Motorola Moto G54", "Motorola Moto G34", "Motorola Razr 50 Ultra", "Motorola Razr 40 Ultra", "Motorola Razr 2023", "Outro"],
+    Asus: ["Asus ZenFone 11 Ultra", "Asus ZenFone 10", "Asus ZenFone 9", "Asus ZenFone 8 Flip", "Asus ZenFone 8", "Asus ROG Phone 8 Pro", "Asus ROG Phone 8", "Asus ROG Phone 7 Ultimate", "Asus ROG Phone 7", "Asus ROG Phone 6 Pro", "Asus ROG Phone 6", "Outro"],
+    Realme: ["Realme GT 6", "Realme GT 5 Pro", "Realme GT 5", "Realme GT 4", "Realme GT 3", "Realme GT 2 Pro", "Realme GT 2", "Realme 12 Pro+", "Realme 12 Pro", "Realme 12", "Realme Narzo 70 Pro", "Realme Narzo 70", "Realme C67", "Realme C65", "Outro"],
+    Huawei: ["Huawei P70 Pro", "Huawei P70", "Huawei P60 Pro", "Huawei P60", "Huawei Mate 60 Pro", "Huawei Mate 60", "Huawei Nova 12 Ultra", "Huawei Nova 12 Pro", "Huawei Nova 12", "Huawei P50 Pro", "Huawei Mate 50 Pro", "Outro"],
+    LG: ["LG Velvet 2 Pro", "LG Velvet", "LG V60 ThinQ", "LG V50 ThinQ", "LG G8X ThinQ", "LG G8 ThinQ", "LG Wing", "LG K92 5G", "LG K62", "LG K52", "Outro"],
+    Sony: ["Xperia 1 VI", "Xperia 1 V", "Xperia 5 V", "Xperia 10 VI", "Xperia 10 V", "Xperia Pro-I II", "Xperia Pro-I", "Xperia 5 IV", "Xperia 1 IV", "Xperia 10 IV", "Outro"],
+    Infinix: ["Infinix Zero 40", "Infinix Zero 30 5G", "Infinix Zero 30", "Infinix Note 40 Pro", "Infinix Note 40", "Infinix Note 30 Pro", "Infinix Note 30", "Infinix Hot 40 Pro", "Infinix Hot 40", "Infinix Smart 8 Pro", "Infinix Smart 8", "Outro"],
+    OnePlus: ["OnePlus 12", "OnePlus 12R", "OnePlus 11", "OnePlus 11R", "OnePlus 10 Pro", "OnePlus 10T", "OnePlus 9 Pro", "OnePlus 9", "OnePlus Nord 4", "OnePlus Nord CE 4", "OnePlus Nord 3", "OnePlus Open", "Outro"],
+    Google: ["Pixel 9 Pro XL", "Pixel 9 Pro", "Pixel 9", "Pixel 8 Pro", "Pixel 8", "Pixel 7 Pro", "Pixel 7", "Pixel 6 Pro", "Pixel 6", "Pixel 6a", "Pixel Fold", "Outro"],
+    Nokia: ["Nokia XR30", "Nokia X30", "Nokia G60", "Nokia G42", "Nokia G22", "Nokia C32", "Nokia C22", "Nokia X20", "Nokia 8.3", "Nokia 5.4", "Outro"],
+    Nothing: ["Nothing Phone (3)", "Nothing Phone (2)", "Nothing Phone (1)", "Nothing Phone (2a)", "Nothing Phone (2a) Plus", "Outro"],
+    Oppo: ["Oppo Find X7 Ultra", "Oppo Find X7", "Oppo Find X6 Pro", "Oppo Find X6", "Oppo Reno12 Pro", "Oppo Reno12", "Oppo Reno11 Pro", "Oppo Reno11", "Oppo A79", "Oppo A78", "Outro"],
+    Vivo: ["Vivo X100 Pro", "Vivo X100", "Vivo X90 Pro", "Vivo X90", "Vivo V40 Pro", "Vivo V40", "Vivo V30 Pro", "Vivo V30", "Vivo Y100", "Vivo Y36", "Outro"]
+  };
+
+  window.atualizarModelos = function() {
+    const marca = document.getElementById('marca').value;
+    const modeloSelect = document.getElementById('modelo');
+    modeloSelect.innerHTML = '<option value="">Selecione o modelo</option>';
+    if(marca && modelos[marca]) {
+      modelos[marca].forEach(m => { const opt = document.createElement('option'); opt.value = m; opt.textContent = m; modeloSelect.appendChild(opt); });
+    }
+  };
+
+  window.gerarSensibilidade = function() {
+    const modelo = document.getElementById('modelo').value;
+    const resultado = document.getElementById('resultado');
+    if(modelo) {
+      const geral = Math.floor(Math.random() * 101) + 100;
+      const pontoVermelho = Math.floor(Math.random() * 101) + 100;
+      const mira2x = Math.floor(Math.random() * 101) + 100;
+      const mira4x = Math.floor(Math.random() * 101) + 100;
+      const tamanhoBotao = Math.floor(Math.random() * (63-45+1)) + 45;
+      resultado.innerHTML = `<strong>Modelo:</strong> ${modelo}<br><strong>Geral:</strong> ${geral}<br><strong>Ponto Vermelho:</strong> ${pontoVermelho}<br><strong>Mira 2x:</strong> ${mira2x}<br><strong>Mira 4x:</strong> ${mira4x}<br><strong>Tamanho do Botão:</strong> ${tamanhoBotao}`;
+      resultado.style.display = 'block';
+    } else {
+      resultado.style.display = 'none';
+    }
+  };
+
+  window.mostrar = function(menu) {
+    document.getElementById('sensi').style.display = menu === 'sensi' ? 'block' : 'none';
+    document.getElementById('auxilio').style.display = menu === 'auxilio' ? 'block' : 'none';
+    document.getElementById('btnSensi').classList.toggle('active', menu === 'sensi');
+    document.getElementById('btnAuxilio').classList.toggle('active', menu === 'auxilio');
+  };
+
+  window.injetarAuxilio = function() {
+    const bar = document.getElementById('progress-bar');
+    const inner = document.getElementById('progress-bar-inner');
+    const msg = document.getElementById('injection-message');
+    bar.style.display = 'block';
+    msg.style.display = 'none';
+    let w = 0;
+    const int = setInterval(() => { if(w>=100) { clearInterval(int); msg.style.display='block'; } else { w++; inner.style.width = w+'%'; } }, 30);
+  };
+
+  // Inicialização
+  window.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('validateMainBtn').addEventListener('click', validateMain);
+    document.getElementById('mainKeyInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') validateMain(); });
+    document.getElementById('adminIcon').addEventListener('click', showAdminModalWithValidation);
+    document.getElementById('closeModalBtn').addEventListener('click', () => {
+      document.getElementById('modalProibida').style.display = 'none';
+    });
+    
+    let clickCount = 0, clickTimer;
+    document.getElementById('mestreXitTitle').addEventListener('click', () => {
+      clickCount++;
+      if(clickTimer) clearTimeout(clickTimer);
+      clickTimer = setTimeout(() => clickCount = 0, 600);
+      if(clickCount === 3) { clickCount = 0; showAdminModalWithValidation(); }
+    });
+    
+    const suffixInput = document.getElementById('customSuffix');
+    const gerarBtn = document.getElementById('gerarKeyBtn');
+    const previewSpan = document.getElementById('previewKeyDisplay');
+    const durationValue = document.getElementById('durationValue');
+    const durationUnit = document.getElementById('durationUnit');
+    
+    function updatePreview() {
+      let suffix = suffixInput.value.trim();
+      previewSpan.innerHTML = `🔑 Visualização: ${KEY_PREFIX}${suffix === "" ? "AUTOMÁTICO" : suffix}`;
+    }
+    suffixInput.addEventListener('input', updatePreview);
+    durationUnit.addEventListener('change', () => {
+      if (durationUnit.value === 'permanent') {
+        durationValue.disabled = true;
+        durationValue.value = 0;
+      } else {
+        durationValue.disabled = false;
+        if (durationValue.value == 0) durationValue.value = 1;
+      }
+      updatePreview();
+    });
+    durationValue.addEventListener('input', updatePreview);
+    
+    gerarBtn.addEventListener('click', async () => {
+      const suffix = suffixInput.value.trim();
+      const val = parseInt(durationValue.value) || 0;
+      const unit = durationUnit.value;
+      if (unit !== 'permanent' && val <= 0) {
+        alert("Defina um valor maior que zero para a duração.");
+        return;
+      }
+      const success = await addNewKey(suffix, val, unit);
+      if(success) {
+        suffixInput.value = "";
+        durationValue.value = 0;
+        durationUnit.value = 'permanent';
+        durationValue.disabled = true;
+        updatePreview();
+      }
+    });
+    
+    listenToKeys();
+    updatePreview();
+    durationValue.disabled = true;
+    
+    particlesJS('particles-js', {
+      particles: { number: { value: 80 }, color: { value: "#ffffff" }, shape: { type: "circle" }, opacity: { value: 0.5 }, size: { value: 3, random: true }, line_linked: { enable: true, distance: 150, color: "#ffffff", opacity: 0.4, width: 1 }, move: { enable: true, speed: 3 } },
+      interactivity: { detect_on: "canvas", events: { onhover: { enable: true, mode: "grab" }, onclick: { enable: true, mode: "push" } }, modes: { grab: { distance: 200, line_linked: { opacity: 1 } }, push: { particles_nb: 4 } } },
+      retina_detect: true
+    });
+  });
+</script>
+</body>
+</html>
